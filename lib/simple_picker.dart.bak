@@ -1,0 +1,178 @@
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:oktoast/oktoast.dart';
+import 'package:try_file_picker_all/utils/QFileUtil.dart';
+import 'package:try_file_picker_all/utils/SDColors.dart';
+import 'package:try_file_picker_all/utils/SDStyle.dart';
+import 'package:try_file_picker_all/utils/q_string_util.dart';
+
+class SimplePicker extends StatefulWidget{
+  const SimplePicker({Key? key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return new SimplePickerState();
+  }
+}
+
+class SimplePickerState extends State<SimplePicker>{
+
+  late Set<PlatformFile> platformFiles = Set();
+  late List<int> deletedSolutionFiles;
+  int existingSolutionFileCount = 0;
+  int remainingSolutionFileCount = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Simple Picker")),
+      body: Center(child: Column(
+        children: [
+          InkWell(
+            child: const Text('Tap to pick a file',),
+            onTap: ()async{
+              showDialog<String>(
+                  context: context,
+                  builder: (BuildContext context) => AlertDialog(
+                      title: Text('File apa yang ingin anda unggah?'),
+                      content: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children : <Widget>[
+                          _buildUploadGambar(),
+                          SizedBox(height:10),
+                          _buildUploadPDF(),
+                          SizedBox(height:10),
+                          _buildUploadCamera(),
+                        ],)));
+          },),
+
+        ],),),
+    );
+  }
+
+  Widget _buildUploadGambar() {
+    String scope="exam, _buildUploadGambar";
+    return InkWell(
+      onTap: () async {
+        QStringUtil.log(scope,"handle upload gambar disini");
+        Navigator.pop(context);
+        if (platformFiles.length>5) return;
+        final result = await FilePicker.platform.pickFiles(
+          allowMultiple: true,
+          type: FileType.image,
+          // type: FileType.custom,
+          // allowedExtensions: QFileUtil.imagesOnly(),
+        );
+        if (result == null) return;
+        if(result.files.length <= remainingSolutionFileCount){
+          platformFiles.addAll(result.files);
+          setState(() {
+            remainingSolutionFileCount -= result.files.length;
+          });
+        }
+        else{
+          platformFiles.addAll(result.files.take(remainingSolutionFileCount));
+          showToast("Sebagian file tidak terpilih karena melebihi batas maksimum unggahan");
+          setState(() {
+            remainingSolutionFileCount = 0;
+          });
+        }},
+      child: Container(
+        margin: EdgeInsets.only(left: 16, right: 16),
+        decoration: boxDecorations(bgColor: Colors.green, radius: 4),
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(flex:1, child: Icon(Icons.image, size: 30, color: Colors.white)), // icon
+            Expanded(flex:4, child: Text('Gambar', style: TextStyle(color: Colors.white))), // text
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUploadPDF() {
+    String scope="exam, _buildUploadPDF";
+    return InkWell(
+      onTap: () async {
+        QStringUtil.log(scope,"handle upload gambar disini");
+        Navigator.pop(context);
+        if (platformFiles.length>5) return;
+        final result = await FilePicker.platform.pickFiles(
+          allowMultiple: true,
+          type: FileType.custom,
+          allowedExtensions: QFileUtil.pdfOnly(),
+        );
+        if (result == null) return;
+        if(result.files.length <= remainingSolutionFileCount){
+          platformFiles.addAll(result.files);
+          setState(() {
+            remainingSolutionFileCount -= result.files.length;
+          });
+        }
+        else{
+          platformFiles.addAll(result.files.take(remainingSolutionFileCount));
+          showToast("Sebagian file tidak terpilih karena melebihi batas maksimum unggahan");
+          setState(() {
+            remainingSolutionFileCount = 0;
+          });
+        }},
+      child: Container(
+        margin: EdgeInsets.only(left: 16, right: 16),
+        decoration: boxDecorations(
+            bgColor: sdPrimaryColor, radius: 4),
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(flex:1, child: Icon(Icons.picture_as_pdf, size: 30, color: Colors.white)), // icon
+            Expanded(flex:4, child: Text('PDF', style: TextStyle(color: Colors.white))), // text
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUploadCamera() {
+    return InkWell(
+      onTap: (){
+        openPicker(ImageSource.camera);
+      },
+      child: Container(
+        margin: EdgeInsets.only(left: 16, right: 16),
+        decoration: boxDecorations(
+            bgColor: sdPrimaryColor, radius: 4),
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(flex:1, child: Icon(Icons.photo_camera, size: 30, color: Colors.white)), // icon
+            Expanded(flex:4, child: Text('Kamera', style: TextStyle(color: Colors.white))), // text
+          ],
+        ),
+      ),
+    );
+  }
+
+  openPicker(ImageSource source) async {
+    var picture = await ImagePicker().pickImage(source: source, maxHeight: 1920, maxWidth: 1080);
+
+    if(picture != null){
+      PlatformFile platformFile = PlatformFile(name: picture.name, size: await picture.length(), readStream: picture.openRead(), path: picture.path);
+
+      setState(() {
+        platformFiles.add(platformFile);
+        remainingSolutionFileCount -= 1;
+      });
+      QStringUtil.log("openPicker", "platformFiles nambah");
+      QStringUtil.log("openPicker", "platform length"+platformFiles.length.toString());
+    }
+
+    Navigator.pop(context);
+  }
+
+}
