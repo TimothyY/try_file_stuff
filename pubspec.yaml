@@ -35,13 +35,17 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   dio: ^4.0.0
-  file_picker: ^4.2.6
+#  file_picker: ^4.2.6
+  file_picker: ^4.5.1
   html: ^0.15.0
   image_picker: ^0.8.5+3
   nb_utils: ^4.5.2
   oktoast: ^3.1.1
   open_file: ^3.2.1
   path_provider: ^2.0.3
+  pdfx: ^1.0.0
+  advance_pdf_viewer:
+    git: https://github.com/ncdm-stldr/pdf_viewer.git
 
 dev_dependencies:
   flutter_test:

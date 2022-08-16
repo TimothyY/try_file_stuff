@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:try_file_picker_all/utils/PDFViewerPage.dart';
 import 'package:try_file_picker_all/utils/QFileUtil.dart';
+import 'package:try_file_picker_all/utils/QImageDialogForFile.dart';
 import 'package:try_file_picker_all/utils/QStyle.dart';
 import 'package:try_file_picker_all/utils/q_string_util.dart';
 
@@ -19,6 +23,7 @@ class SimplePicker extends StatefulWidget{
 //tidak cocok untuk upload dokumen word, excel, ppt. in such cases either do not preview the result directly or use the advance picker style.
 class SimplePickerState extends State<SimplePicker>{
 
+  //to contain the picked file. use list for multiple files.
   PlatformFile? platformFile=null;
 
   @override
@@ -48,7 +53,7 @@ class SimplePickerState extends State<SimplePicker>{
                         ],)));
           },),
           const SizedBox(height: 48,),
-          Text(platformFile==null?"":platformFile!.name),
+          _buildPickedFile(platformFile)
         ],),),
     );
   }
@@ -149,4 +154,41 @@ class SimplePickerState extends State<SimplePicker>{
     Navigator.pop(context);
   }
 
+  Widget _buildPickedFile(PlatformFile? pickedPlatformFile) {
+    String scope="_buildPickedFile";
+    List<String> _validExtensions = ["jpg","bmp","gif","png","jpeg","heic"];
+    if(pickedPlatformFile!=null){
+      return InkWell(
+        onTap: () async {
+          QStringUtil.log(scope,"handle view picked file here");
+          if(_validExtensions.contains(pickedPlatformFile.extension!.toLowerCase().toString())){
+            showDialog(
+                context: context,
+                builder: (_) => QImageDialogForFile(file: File(platformFile!.path!))
+            );
+          }else if(pickedPlatformFile.extension!.toLowerCase().compareTo("pdf")==0){
+            Navigator.push(context, MaterialPageRoute(
+                builder: (BuildContext context) => PDFViewerPage(file: File(platformFile!.path!))
+            )
+            );
+          }},
+        child: Container(
+          margin: const EdgeInsets.only(left: 16, right: 16),
+          decoration: boxDecorations(bgColor: Colors.blue, radius: 4),
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              // icon
+              Expanded(flex:9, child: Text(pickedPlatformFile.name, style: TextStyle(color: Colors.white))), // text
+              Expanded(flex:1, child: Icon(Icons.visibility, size: 30, color: Colors.white)),
+            ],
+          ),
+        ),
+      );
+    }else {
+      return SizedBox.shrink();
+    }
+
+  }
 }

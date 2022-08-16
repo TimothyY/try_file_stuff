@@ -44,8 +44,8 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            InkWell(child: const Text('Go to simple_download_file sample',),onTap: ()async{
-              showToast('handle Go to file_picker sample here',duration: Duration(seconds: 2),
+            InkWell(child: const Text('Go to download file',),onTap: ()async{
+              showToast('handle Go to download file here',duration: Duration(seconds: 2),
                 position: ToastPosition.bottom,
                 backgroundColor: Colors.black.withOpacity(0.8),
                 radius: 13.0,);
@@ -55,8 +55,8 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             },),
             SizedBox(height: 64,),
-            InkWell(child: const Text('Go to simple_picker_for_image_n_file_n_camera sample',),onTap: ()async{
-              showToast('handle Go to image_n_file_picker sample here',duration: Duration(seconds: 2),
+            InkWell(child: const Text('Go to single file picker',),onTap: ()async{
+              showToast('handle Go to single picker here',duration: Duration(seconds: 2),
                 position: ToastPosition.bottom,
                 backgroundColor: Colors.black.withOpacity(0.8),
                 radius: 13.0,);
